@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Net.Sockets;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Networking {
@@ -25,10 +23,15 @@ namespace Networking {
             var lengthBytes = BitConverter.GetBytes((ushort)data.Length);
             Array.Copy(lengthBytes, 0, _buffer, 1, 2);
             Array.Copy(data, 0, _buffer, 3, data.Length);
-            // Remove these lines
+            /*
+             * REMOVE THE 2 LINES BELOW
+             */
             SimulateDouble(data.Length + 3);
             await _stream.WriteAsync(_buffer, 0, (data.Length + 3) * 2);
-            // Remove avove lines
+            /*
+             * REMOVE 2 LINES ABOVE
+             * UNCOMMENT LINE BELOW
+             */
             // await _stream.WriteAsync(_buffer, 0, data.Length + 3); // UNCOMMENT THIS
         }
 
