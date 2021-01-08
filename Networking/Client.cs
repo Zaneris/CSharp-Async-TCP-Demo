@@ -6,9 +6,10 @@ namespace Networking {
     class Client {
         private readonly NetworkStream _stream;
         private readonly byte[] _buffer = new byte[256];
+        private const int HEADER_SIZE = 3;
 
-        public Client(int port, string destination) {
-            var client = new TcpClient(destination, port);
+        public Client(string destinationIp, int port) {
+            var client = new TcpClient(destinationIp, port);
             _stream = client.GetStream();
         }
 
@@ -21,22 +22,9 @@ namespace Networking {
             var data = packet.GetBytes();
             _buffer[0] = packet.ID;
             var lengthBytes = BitConverter.GetBytes((ushort)data.Length);
-            Array.Copy(lengthBytes, 0, _buffer, 1, 2);
-            Array.Copy(data, 0, _buffer, 3, data.Length);
-            /*
-             * REMOVE THE 2 LINES BELOW
-             */
-            SimulateDouble(data.Length + 3);
-            await _stream.WriteAsync(_buffer, 0, (data.Length + 3) * 2);
-            /*
-             * REMOVE 2 LINES ABOVE
-             * UNCOMMENT LINE BELOW
-             */
-            // await _stream.WriteAsync(_buffer, 0, data.Length + 3); // UNCOMMENT THIS
-        }
-
-        public void SimulateDouble(int length) { // Delete this method
-            Array.Copy(_buffer, 0, _buffer, length, length);
+            Array.Copy(lengthBytes, 0, _buffer, 1, lengthBytes.Length);
+            Array.Copy(data, 0, _buffer, HEADER_SIZE, data.Length);
+            await _stream.WriteAsync(_buffer, 0, data.Length + HEADER_SIZE);
         }
     }
 }

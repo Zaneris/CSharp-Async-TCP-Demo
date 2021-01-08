@@ -9,9 +9,10 @@ namespace Networking {
         private readonly TcpListener _server;
         private readonly List<Task> _clients;
         private readonly Task _task;
+        private const int HEADER_SIZE = 3;
 
-        public Server(int port, string listeningAddress) {
-            var ip = IPAddress.Parse(listeningAddress);
+        public Server(string listeningIp, int port) {
+            var ip = IPAddress.Parse(listeningIp);
             _clients = new List<Task>();
             _server = new TcpListener(ip, port);
             _server.Start();
@@ -36,13 +37,13 @@ namespace Networking {
                 IPacket packet = null;
                 int index = 0;
                 while(index < i) {
-                    var length = BitConverter.ToUInt16(bytes, index + 1);
+                    var packetLength = BitConverter.ToUInt16(bytes, index + 1);
                     switch(bytes[index]) {
                         case 1: // PacketMessage
-                            packet = new PacketMessage(bytes, index + 3, length);
+                            packet = new PacketMessage(bytes, index + HEADER_SIZE, packetLength);
                             break;
                     }
-                    index += length + 3;
+                    index += packetLength + HEADER_SIZE;
                     packet.HandlePacket();
                 }
             }
