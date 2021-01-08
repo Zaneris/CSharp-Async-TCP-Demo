@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
+using Networking.Packets;
 
 namespace Networking {
     class Server {
         private readonly TcpListener _server;
         private readonly List<Task> _clients;
         private readonly Task _task;
-        private const int HEADER_SIZE = 3;
 
         public Server(string listeningIp, int port) {
             var ip = IPAddress.Parse(listeningIp);
@@ -31,21 +31,13 @@ namespace Networking {
         }
 
         private async Task ListenToClient(NetworkStream stream) {
-            var bytes = new byte[256];
+            var packetList = new List<IPacket>();
+            var builder = new PacketBuilder();
+            var bytes = new byte[1024];
             int i;
             while((i = await stream.ReadAsync(bytes, 0, bytes.Length)) != 0) {
-                IPacket packet = null;
-                int index = 0;
-                while(index < i) {
-                    var packetLength = BitConverter.ToUInt16(bytes, index + 1);
-                    switch(bytes[index]) {
-                        case 1: // PacketMessage
-                            packet = new PacketMessage(bytes, index + HEADER_SIZE, packetLength);
-                            break;
-                    }
-                    index += packetLength + HEADER_SIZE;
+                foreach(var packet in builder.ReceivePacket(bytes, i, packetList))
                     packet.HandlePacket();
-                }
             }
         }
     }

@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Text;
 
-namespace Networking {
-    class PacketMessage : IPacket {
+namespace Networking.Packets {
+    public class PacketMessage : IPacket {
         private readonly string _msg;
 
         public PacketMessage(string message) {
@@ -13,7 +13,7 @@ namespace Networking {
             _msg = Encoding.ASCII.GetString(bytes, start, length);
         }
 
-        public byte ID => 1;
+        public PacketTypes ID => PacketTypes.Message;
 
         public byte[] GetBytes() {
             return Encoding.ASCII.GetBytes(_msg);
