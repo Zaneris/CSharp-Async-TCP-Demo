@@ -5,13 +5,16 @@ using System.Net.Sockets;
 using System.Threading.Tasks;
 using Networking.Packets;
 
-namespace Networking {
-    class Server {
+namespace Networking
+{
+    public class Server
+    {
         private readonly TcpListener _server;
         private readonly List<Task> _clients;
         private readonly Task _task;
 
-        public Server(string listeningIp, int port) {
+        public Server(string listeningIp, int port)
+        {
             var ip = IPAddress.Parse(listeningIp);
             _clients = new List<Task>();
             _server = new TcpListener(ip, port);
@@ -19,8 +22,10 @@ namespace Networking {
             _task = ListenForClients();
         }
 
-        private async Task ListenForClients() {
-            while(true) {
+        private async Task ListenForClients()
+        {
+            while (true)
+            {
                 Console.WriteLine("Listening For Clients!");
                 var client = await _server.AcceptTcpClientAsync();
                 Console.WriteLine("Client Connected To Server!");
@@ -30,13 +35,15 @@ namespace Networking {
             }
         }
 
-        private async Task ListenToClient(NetworkStream stream) {
+        private async Task ListenToClient(NetworkStream stream)
+        {
             var packetList = new List<IPacket>();
             var builder = new PacketBuilder();
             var bytes = new byte[1024];
             int i;
-            while((i = await stream.ReadAsync(bytes, 0, bytes.Length)) != 0) {
-                foreach(var packet in builder.ReceivePacket(bytes, i, packetList))
+            while ((i = await stream.ReadAsync(bytes, 0, bytes.Length)) != 0)
+            {
+                foreach (var packet in builder.ReceivePacket(bytes, i, packetList))
                     packet.HandlePacket();
             }
         }
